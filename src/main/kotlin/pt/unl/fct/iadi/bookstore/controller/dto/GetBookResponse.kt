@@ -5,14 +5,12 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.URL
-import org.hibernate.validator.constraints.UniqueElements
 import pt.unl.fct.iadi.bookstore.domain.Book
 
 class GetBookResponse(
 
     @field:Schema(description = "Unique ISBN identifier", example = "9780134685991", required = true)
     @field:NotBlank
-    @field:UniqueElements
     val isbn : String,
 
     @field:NotBlank
