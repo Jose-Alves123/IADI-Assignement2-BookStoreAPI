@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:8080/api
+@baseUrl = http://localhost:8080
 @isbn = 9780134685991
 @otherIsbn = 9780321356680
 @reviewId = 123e4567-e89b-12d3-a456-426614174000
