@@ -141,7 +141,12 @@ interface BookstoreAPI {
             ApiResponse(
                 responseCode = "200",
                 description = "Book found",
-                content = [Content(schema = Schema(implementation = GetBookResponse::class))]
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = GetBookResponse::class)
+                    )
+                ]
             ),
             ApiResponse(
                 responseCode = "404",
