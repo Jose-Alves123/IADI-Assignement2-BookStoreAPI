@@ -1,0 +1,194 @@
+@baseUrl = http://localhost:8080/api
+@isbn = 9780134685991
+@otherIsbn = 9780321356680
+@reviewId = 123e4567-e89b-12d3-a456-426614174000
+
+### US1 - List books (success, possibly empty)
+GET {{baseUrl}}/books
+Accept: application/json
+
+### US2 - Create book (success)
+POST {{baseUrl}}/books
+Content-Type: application/json
+Accept: application/json
+
+{
+  "isbn": "{{isbn}}",
+  "title": "Effective Java",
+  "author": "Joshua Bloch",
+  "price": 29.99,
+  "image": "https://example.com/cover.jpg"
+}
+
+### US2 - Create same book again (error 409 conflict)
+POST {{baseUrl}}/books
+Content-Type: application/json
+Accept: application/json
+
+{
+  "isbn": "{{isbn}}",
+  "title": "Effective Java",
+  "author": "Joshua Bloch",
+  "price": 29.99,
+  "image": "https://example.com/cover.jpg"
+}
+
+### US2 - Create book (error 400 validation)
+POST {{baseUrl}}/books
+Content-Type: application/json
+Accept: application/json
+
+{
+  "isbn": "",
+  "title": "",
+  "author": "",
+  "price": -1,
+  "image": "not-a-url"
+}
+
+### US3 - Get single book (success)
+GET {{baseUrl}}/books/{{isbn}}
+Accept: application/json
+
+### US3 - Get single book (error 404, pt language)
+GET {{baseUrl}}/books/0000000000000
+Accept: application/json
+Accept-Language: pt
+
+### US4 - Replace book (upsert create, 201)
+PUT {{baseUrl}}/books/{{otherIsbn}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "isbn": "{{otherIsbn}}",
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "price": 25.50,
+  "image": "https://example.com/clean-code.jpg"
+}
+
+### US4 - Replace book (error 400 ISBN mismatch)
+PUT {{baseUrl}}/books/{{otherIsbn}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "isbn": "9780000000000",
+  "title": "Mismatch",
+  "author": "Author",
+  "price": 10.00,
+  "image": "https://example.com/x.jpg"
+}
+
+### US5 - Patch book (success)
+PATCH {{baseUrl}}/books/{{isbn}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "price": 31.99
+}
+
+### US5 - Patch book (error 404)
+PATCH {{baseUrl}}/books/0000000000000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "No book"
+}
+
+### US6 - Delete book (success 204)
+DELETE {{baseUrl}}/books/{{otherIsbn}}
+Accept: application/json
+
+### US6 - Delete book (error 404)
+DELETE {{baseUrl}}/books/0000000000000
+Accept: application/json
+
+### US7 - List reviews for a book (success, possibly empty)
+GET {{baseUrl}}/books/{{isbn}}/reviews
+Accept: application/json
+
+### US7 - List reviews for missing book (error 404)
+GET {{baseUrl}}/books/0000000000000/reviews
+Accept: application/json
+
+### US8 - Create review (success)
+POST {{baseUrl}}/books/{{isbn}}/reviews
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rating": 5,
+  "comment": "Excellent reference"
+}
+
+### US8 - Create review on missing book (error 404)
+POST {{baseUrl}}/books/0000000000000/reviews
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rating": 4,
+  "comment": "Should fail"
+}
+
+### US8 - Create review (error 400 validation)
+POST {{baseUrl}}/books/{{isbn}}/reviews
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rating": 8,
+  "comment": "Invalid rating"
+}
+
+### Use response body from create review to set @reviewId manually, then run below requests
+
+### US9 - Replace review (success)
+PUT {{baseUrl}}/books/{{isbn}}/reviews/{{reviewId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rating": 3,
+  "comment": "After second read, still good"
+}
+
+### US9 - Replace review (error 404 review missing)
+PUT {{baseUrl}}/books/{{isbn}}/reviews/123e4567-e89b-12d3-a456-426614174001
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rating": 4,
+  "comment": "Missing review"
+}
+
+### US10 - Patch review (success)
+PATCH {{baseUrl}}/books/{{isbn}}/reviews/{{reviewId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "comment": "Updated comment only"
+}
+
+### US10 - Patch review (error 400 validation)
+PATCH {{baseUrl}}/books/{{isbn}}/reviews/{{reviewId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "rating": 10
+}
+
+### US11 - Delete review (success 204)
+DELETE {{baseUrl}}/books/{{isbn}}/reviews/{{reviewId}}
+Accept: application/json
+
+### US11 - Delete review (error 404)
+DELETE {{baseUrl}}/books/{{isbn}}/reviews/123e4567-e89b-12d3-a456-426614174099
+Accept: application/json
