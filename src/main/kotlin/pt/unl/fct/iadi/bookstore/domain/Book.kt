@@ -22,7 +22,12 @@ data class Book(
     @field:Size(min = 1, max = 80)
     val author : String,
 
-    @field:Schema(description = "Price of the book, must be greater than zero", example = "29.99", required = true)
+    @field:Schema(
+        description = "Price of the book, must be greater than zero",
+        example = "29.99",
+        required = true,
+        minimum = "0.01"
+    )
     @field:Positive
     val price : Double,
 

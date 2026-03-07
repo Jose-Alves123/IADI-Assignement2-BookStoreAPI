@@ -25,9 +25,13 @@ class GetBookResponse(
     @field:Schema(description = "Author of the book", example = "Joshua Bloch", required = true)
     val author : String,
 
-    @field:NotBlank
     @field:Positive
-    @field:Schema(description = "Price of the book, must be greater than zero", example = "29.99", required = true)
+    @field:Schema(
+        description = "Price of the book, must be greater than zero",
+        example = "29.99",
+        required = true,
+        minimum = "0.01"
+    )
     val price : Double,
 
     @field:NotBlank
