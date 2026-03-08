@@ -1,22 +1,32 @@
 package pt.unl.fct.iadi.bookstore.controller
 
 import jakarta.validation.Valid
+import java.util.Locale
+import org.springframework.context.MessageSource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import pt.unl.fct.iadi.bookstore.controller.dto.CreateBookRequest
 import pt.unl.fct.iadi.bookstore.controller.dto.CreateReviewRequest
+import pt.unl.fct.iadi.bookstore.controller.dto.ErrorResponse
 import pt.unl.fct.iadi.bookstore.controller.dto.GetBookResponse
 import pt.unl.fct.iadi.bookstore.controller.dto.GetReviewResponse
 import pt.unl.fct.iadi.bookstore.controller.dto.UpdateBookPatchRequest
 import pt.unl.fct.iadi.bookstore.controller.dto.UpdateReviewPatchRequest
+import pt.unl.fct.iadi.bookstore.service.BookNotFoundException
 import pt.unl.fct.iadi.bookstore.service.BookstoreService
 import java.util.UUID
 
 @RestController
-class BookstoreController(private val service: BookstoreService) : BookstoreAPI {
+class BookstoreController(
+    private val service: BookstoreService,
+    private val messageSource: MessageSource
+) : BookstoreAPI {
 
     override fun bookstoreAdd(@Valid @RequestBody book: CreateBookRequest): ResponseEntity<Void> {
         service.createBook(book.toBook())
@@ -127,5 +137,28 @@ class BookstoreController(private val service: BookstoreService) : BookstoreAPI 
     ): ResponseEntity<Void> {
         service.deleteReview(isbn, reviewId)
         return ResponseEntity.noContent().build()
+    }
+
+    @ExceptionHandler(BookNotFoundException::class)
+    fun handleBookNotFoundInController(
+        ex: BookNotFoundException,
+        locale: Locale
+    ): ResponseEntity<ErrorResponse> {
+        val responseLocale = if (locale.language.equals("pt", ignoreCase = true)) {
+            Locale.forLanguageTag("pt")
+        } else {
+            Locale.ENGLISH
+        }
+
+        val message = messageSource.getMessage(
+            "error.book.notFound",
+            arrayOf(ex.isbn),
+            responseLocale
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .header(HttpHeaders.CONTENT_LANGUAGE, responseLocale.language)
+            .body(ErrorResponse("NOT_FOUND", message))
     }
 }
